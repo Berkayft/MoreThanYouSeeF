@@ -1,7 +1,9 @@
 import axios from "axios";
 
 const api = axios.create({
-  baseURL: "http://localhost:5000/catalogs", // Backend URL
+  baseURL: process.env.NODE_ENV === "production" 
+    ? "/api/catalogs"  // Production için backend route (NGINX üzerinden geçiyor)
+    : "http://localhost:5000/catalogs", // Backend URL
   headers: {
     "Content-Type": "application/json",
   },
