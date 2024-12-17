@@ -1,11 +1,18 @@
 import axios from "axios";
 
 const api = axios.create({
-  baseURL: "http://localhost:5000/catalogs", // Backend URL
+  baseURL: "/api/catalogs", // Backend URL
   headers: {
     "Content-Type": "application/json",
   },
 });
+
+const authApi = axios.create({
+  baseURL: "/api/auth", // Backend URL,
+  headers: {
+    "Content-Type": "application/json",
+  },
+})
 
 export const createCatalog = async (data, token) => {
   const response = await api.post("/newCatalog", data, {
@@ -13,6 +20,18 @@ export const createCatalog = async (data, token) => {
   });
   return response.data;
 };
+
+export const handleLogin = async (data) => {
+  const jsonData = JSON.stringify(data);
+  const response = await authApi.post("/login", jsonData);
+  return response.data;
+}
+
+export const handleRegister = async (data) => {
+  const jsonData = JSON.stringify(data);
+  const response = await authApi.post("/register", jsonData);
+  return response.data;
+}
 
 export const getUserCatalogs = async (token) => {
   const response = await api.post("/getusercatalogs", {}, {

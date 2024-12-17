@@ -1,7 +1,10 @@
 import { useState } from 'react';
+import { useRouter } from 'next/router';
+import { handleRegister } from '../services/api';
 
 export default function Register() {
   const [formData, setFormData] = useState({ email: '', username: '', password: '' });
+  const router = useRouter();
 
   const handleChange = (e:any) => {
     const { name, value } = e.target;
@@ -11,15 +14,10 @@ export default function Register() {
   const handleSubmit = async (e:any) => {
     e.preventDefault();
     try {
-      const response = await fetch('http://localhost:5000/auth/register', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(formData),
-      });
+      const response = await handleRegister(formData);
 
       const data = await response.json();
+      router.push('/login');
       console.log(data); // Kayıt sonrası mesajı veya hatayı burada işleyebilirsiniz.
     } catch (error) {
       console.error('Register error:', error);

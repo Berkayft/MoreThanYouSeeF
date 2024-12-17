@@ -1,7 +1,10 @@
 import { useState } from 'react';
+import { useRouter } from 'next/router';
+import { handleLogin } from '../services/api';
 
 export default function Login() {
   const [formData, setFormData] = useState({ email: '', password: '' });
+  const router = useRouter();
 
   const handleChange = (e:any) => {
     const { name, value } = e.target;
@@ -11,13 +14,7 @@ export default function Login() {
   const handleSubmit = async (e: any) => {
     e.preventDefault();
     try {
-      const response = await fetch('http://localhost:5000/auth/login', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(formData),
-      });
+      const response = await handleLogin(formData);
   
       if (!response.ok) {
         console.error('Response status:', response.status);
@@ -32,6 +29,7 @@ export default function Login() {
   
       if (accessToken) {
         localStorage.setItem('accessToken', accessToken);
+        router.push('/');
         console.log('Access Token stored in localStorage:', accessToken);
       } else {
         console.error('Access token not received.');
