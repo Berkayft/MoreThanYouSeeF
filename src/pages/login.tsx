@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { useRouter } from 'next/router';
 import { handleLogin } from '../services/api';
+import axios  from 'axios';
 
 export default function Login() {
   const [formData, setFormData] = useState({ email: '', password: '' });
@@ -16,16 +17,8 @@ export default function Login() {
     try {
       const response = await handleLogin(formData);
   
-      if (!response.ok) {
-        console.error('Response status:', response.status);
-        throw new Error('Login failed!');
-      }
-  
-      const data = await response.json();
-      console.log('Response data:', data);
-  
-      // access_token doğru anahtarı kullanılarak alınmalı
-      const accessToken = data.access_token;
+      const accessToken = response.access_token;
+      console.log('Access Token:', accessToken);
   
       if (accessToken) {
         localStorage.setItem('accessToken', accessToken);
@@ -35,7 +28,13 @@ export default function Login() {
         console.error('Access token not received.');
       }
     } catch (error) {
-      console.error('Login error:', error);
+      if (axios.isAxiosError(error)) {
+        // Axios error ise
+        console.error('Login error (Axios):', error.response?.data || error.message);
+      } else {
+        // Diğer türde bir hata
+        console.error('Login error:', (error as Error).message);
+      }
     }
   };
   
