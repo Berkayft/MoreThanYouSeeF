@@ -1,9 +1,7 @@
 import axios from "axios";
 
 const api = axios.create({
-  baseURL: process.env.NODE_ENV === "production" 
-    ? "/api/catalogs"  // Production için backend route (NGINX üzerinden geçiyor)
-    : "http://localhost:5000/catalogs", // Backend URL
+  baseURL: "http://localhost:5000/catalogs", // Backend URL
   headers: {
     "Content-Type": "application/json",
   },
@@ -73,3 +71,26 @@ export const deleteCatalog = async (catalogId, token) => {
   return response.data;
 };
 
+
+export const getCallBack = async (catalogId, file) => {
+  const formData = new FormData();
+  formData.append("file", file);
+
+  const response = await api.post(`/matchImage/${catalogId}`, formData, {
+    headers: {
+      "Content-Type": "multipart/form-data",
+    },
+  });
+  console.log(response.data);
+  return response.data; //will be url string
+};
+
+export const isCatalogExist = async (catalogId) => {
+  const response = await api.post(`/isCatalogExist/${catalogId}`,{
+    headers: {
+      "Content-Type": "application/json",
+    },
+  })
+  return response.data;
+
+}
