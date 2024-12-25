@@ -41,16 +41,25 @@ export const getUserCatalogs = async (token) => {
 };
 
 export const addContentToCatalog = async (catalogId, file, token) => {
-  const formData = new FormData();
-  formData.append("file", file);
+    try {
+    // Resmi yeniden boyutlandır
+    const resizedFile = await resizeImage(file, 244, 244);
 
-  const response = await api.post(`/newContent/${catalogId}`, formData, {
-    headers: {
-      Authorization: `Bearer ${token}`,
-      "Content-Type": "multipart/form-data",
-    },
-  });
-  return response.data;
+    const formData = new FormData();
+    formData.append("file", resizedFile);
+
+    const response = await api.post(`/newContent/${catalogId}`, formData, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+        "Content-Type": "multipart/form-data",
+      },
+    });
+
+    return response.data;
+  } catch (err) {
+    console.error("Hata:", err);
+    throw err;
+  }
 };
 
 export const getCatalogContents = async (catalogId, token) => {
@@ -90,18 +99,55 @@ export const deleteCatalog = async (catalogId, token) => {
   return response.data;
 };
 
+export const resizeImage = async (file, width, height) => {
+  return new Promise((resolve, reject) => {
+    const img = new Image();
+    img.onload = () => {
+      const canvas = document.createElement("canvas");
+      canvas.width = width;
+      canvas.height = height;
+
+      const ctx = canvas.getContext("2d");
+      ctx.drawImage(img, 0, 0, width, height);
+
+      canvas.toBlob(
+        (blob) => {
+          if (blob) {
+            resolve(new File([blob], file.name, { type: file.type }));
+          } else {
+            reject(new Error("Resim dönüştürme hatası"));
+          }
+        },
+        file.type,
+        1 // kalite (1 = maksimum kalite)
+      );
+    };
+    img.onerror = (err) => reject(err);
+    img.src = URL.createObjectURL(file);
+  });
+};
+
 
 export const getCallBack = async (catalogId, file) => {
-  const formData = new FormData();
-  formData.append("file", file);
 
-  const response = await api.post(`/matchImage/${catalogId}`, formData, {
-    headers: {
-      "Content-Type": "multipart/form-data",
-    },
-  });
-  console.log(response.data);
-  return response.data; //will be url string
+  try {
+    const resizedFile = await resizeImage(file, 244, 244);
+
+    const formData = new FormData();
+    formData.append("file", resizedFile);
+
+    const response = await api.post(`/matchImage/${catalogId}`, formData, {
+      headers: {
+        "Content-Type": "multipart/form-data",
+      },
+    });
+
+    console.log(response.data);
+    return response.data; // URL string
+  } catch (err) {
+    console.error("Hata:", err);
+    throw err;
+  }
 };
 
 export const isCatalogExist = async (catalogId) => {
